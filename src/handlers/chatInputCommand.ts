@@ -9,6 +9,7 @@ import {
 } from 'discord.js';
 import { AppDataSource } from '../typeorm';
 import { TicketConfig } from '../typeorm/entities/TicketConfig';
+import { handleRolesCommand } from './rolesCommandHandler';
 
 const ticketConfigRepository = AppDataSource.getRepository(TicketConfig);
 
@@ -17,6 +18,7 @@ export async function handleChatInputCommand(
   interaction: ChatInputCommandInteraction<CacheType>
 ) {
   console.log('HandleChatInputCommand');
+  console.log(interaction.commandName);
   switch (interaction.commandName) {
     case 'setup': {
       const guildId = interaction.guildId || '';
@@ -69,6 +71,9 @@ export async function handleChatInputCommand(
           ephemeral: true,
         });
       }
+    }
+    case 'roles': {
+      return handleRolesCommand(client, interaction);
     }
   }
 }

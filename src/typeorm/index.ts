@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Ticket } from './entities/Ticket';
 import { TicketConfig } from './entities/TicketConfig';
+import { TicketConfigRole } from './entities/TicketConfigRole';
 
 export const AppDataSource = new DataSource({
   type: 'mysql',
@@ -10,5 +11,5 @@ export const AppDataSource = new DataSource({
   password: process.env.MYSQL_DB_PASSWORD,
   database: process.env.MYSQL_DB_DATABASE,
   synchronize: true,
-  entities: [TicketConfig, Ticket],
+  entities: [TicketConfig, Ticket, TicketConfigRole],
 });

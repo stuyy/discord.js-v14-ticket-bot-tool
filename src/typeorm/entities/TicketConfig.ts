@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { TicketConfigRole } from './TicketConfigRole';
 
 @Entity({ name: 'ticket_configs' })
 export class TicketConfig {
@@ -13,4 +14,7 @@ export class TicketConfig {
 
   @Column()
   channelId: string;
+
+  @OneToMany(() => TicketConfigRole, (role) => role.ticketConfig)
+  roles: TicketConfigRole[];
 }

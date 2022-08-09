@@ -7,6 +7,7 @@ import {
   ChannelType,
   Client,
   GuildTextBasedChannel,
+  OverwriteResolvable,
 } from 'discord.js';
 import { AppDataSource } from '../typeorm';
 import { Ticket } from '../typeorm/entities/Ticket';
@@ -21,16 +22,20 @@ export async function handleButtonInteraction(
 ) {
   console.log('Button Interaction');
   const { guild, guildId, channelId } = interaction;
+  const ticketConfig = await ticketConfigRepository.findOne({
+    where: {
+      guildId: guildId || '',
+    },
+    relations: ['roles'],
+  });
+  console.log(ticketConfig);
+  if (!ticketConfig) {
+    console.log('No ticket config exists');
+    return;
+  }
   switch (interaction.customId) {
     case 'createTicket': {
       try {
-        const ticketConfig = await ticketConfigRepository.findOneBy({
-          guildId: guildId || '',
-        });
-        if (!ticketConfig) {
-          console.log('No ticket config exists');
-          return;
-        }
         if (!guild) {
           console.log('Guild is Null');
           return;
@@ -53,10 +58,20 @@ export async function handleButtonInteraction(
             createdBy: interaction.user.id,
           });
           const savedTicket = await ticketRepository.save(newTicket);
+
+          const rolePermissions: OverwriteResolvable[] = ticketConfig.roles.map(
+            (role) => ({
+              allow: ['ViewChannel', 'SendMessages'],
+              id: role.roleId,
+            })
+          );
+
+          console.log(rolePermissions);
+
           const newTicketChannel = await guild.channels.create({
             name: `ticket-${savedTicket.id.toString().padStart(6, '0')}`,
             type: ChannelType.GuildText,
-            parent: '1002915116783771668',
+            parent: '1006461080287051786',
             permissionOverwrites: [
               {
                 allow: ['ViewChannel', 'SendMessages'],
@@ -70,6 +85,7 @@ export async function handleButtonInteraction(
                 deny: ['ViewChannel', 'SendMessages'],
                 id: guildId!,
               },
+              ...rolePermissions,
             ],
           });
           const newTicketMessage = await newTicketChannel.send({
@@ -104,6 +120,16 @@ export async function handleButtonInteraction(
       const channel = interaction.channel as GuildTextBasedChannel;
       const ticket = await ticketRepository.findOneBy({ channelId });
       if (!ticket) return console.log('Ticket Not Found');
+
+      const rolePermissions: OverwriteResolvable[] = ticketConfig.roles.map(
+        (role) => ({
+          allow: ['ViewChannel', 'SendMessages'],
+          id: role.roleId,
+        })
+      );
+
+      console.log(rolePermissions);
+
       if (user.id === ticket.createdBy) {
         console.log('User who created ticket is now trying to close it...');
         await ticketRepository.update({ id: ticket.id }, { status: 'closed' });
@@ -121,6 +147,7 @@ export async function handleButtonInteraction(
               deny: ['ViewChannel', 'SendMessages'],
               id: guildId!,
             },
+            ...rolePermissions,
           ],
         });
         await interaction.update({

@@ -36,6 +36,33 @@ const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
         .addChannelTypes(ChannelType.GuildText)
     )
     .toJSON(),
+  new SlashCommandBuilder()
+    .setName('roles')
+    .setDescription('Manage roles for Ticket Bot')
+    .setDefaultMemberPermissions('0')
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('add')
+        .setDescription('Adds a Guild Role to the Ticket Configuration')
+        .addRoleOption((option) =>
+          option
+            .setName('role')
+            .setDescription('The role to add to the Ticket Config')
+            .setRequired(true)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('remove')
+        .setDescription('Removes a Guild Role from the Ticket Configuration')
+        .addRoleOption((option) =>
+          option
+            .setName('role')
+            .setDescription('The role to remove from the Ticket Config')
+            .setRequired(true)
+        )
+    )
+    .toJSON(),
 ];
 
 client.on('ready', () => console.log(`${client.user?.tag} logged in`));
