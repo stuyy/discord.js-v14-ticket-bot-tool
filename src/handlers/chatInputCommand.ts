@@ -71,6 +71,7 @@ export async function handleChatInputCommand(
           ephemeral: true,
         });
       }
+      break;
     }
     case 'roles': {
       return handleRolesCommand(client, interaction);
